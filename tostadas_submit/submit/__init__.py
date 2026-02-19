@@ -27,8 +27,16 @@ def cmd_submit(args):
     config_dict = project.config_dict_legacy()
     state_db = project.state_db
 
-    mode_str = "Test" if args.test else "Production"
-    transfer_mode = project.config.get("submission", {}).get("mode", "ftp")
+    # test mode: CLI flag overrides config
+    sub_config = project.config.get("submission", {})
+    test_mode = args.test if args.test is not None else sub_config.get("test", True)
+    if isinstance(test_mode, str):
+        test_mode = test_mode.lower() in ("true", "yes", "1")
+    mode_str = "Test" if test_mode else "Production"
+
+    identifier = args.identifier or os.path.basename(project.project_dir)
+
+    transfer_mode = sub_config.get("mode", "ftp")
     client = get_client(config_dict, mode=transfer_mode, dry_run=args.dry_run)
 
     submissions_dir = project.submissions_dir
@@ -66,7 +74,6 @@ def cmd_submit(args):
                 continue
 
             # Build remote directory path
-            identifier = os.path.basename(project.project_dir)
             base_folder = f"{identifier}_{batch_id}_{database}"
             if platform:
                 base_folder += f"_{platform}"
@@ -84,8 +91,14 @@ def cmd_submit(args):
                     local = os.path.join(dirpath, fname)
                     client.upload_file(local, fname)
                     if is_fastq_file(fname):
-                        if os.path.islink(local):
-                            os.remove(local)
+                        try:
+                            if os.path.islink(local):
+                                os.remove(local)
+                                logging.info(f"Deleted symlinked FASTQ after upload: {local}")
+                            else:
+                                logging.warning(f"FASTQ {local} is not a symlink, keeping original.")
+                        except OSError as e:
+                            logging.warning(f"Could not delete FASTQ {local}: {e}")
                 client.close()
 
             state_db.record_submission(database, batch_id, remote_dir)

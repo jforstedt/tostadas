@@ -50,10 +50,13 @@ def build_parser():
     # --- submit ---
     sub_p = subparsers.add_parser("submit", help="Upload submission files to NCBI")
     sub_p.add_argument("--project-dir", default=".", help="Project directory")
+    sub_p.add_argument("--identifier", default=None,
+                       help="Unique identifier for NCBI FTP folder name (default: project dir name)")
     sub_p.add_argument("--databases", nargs="+", default=None,
                        choices=["biosample", "sra", "genbank"],
                        help="Databases to submit (default: all pending)")
-    sub_p.add_argument("--test", action="store_true", help="Upload to NCBI test server")
+    sub_p.add_argument("--test", action="store_true", default=None,
+                       help="Upload to NCBI test server (default: from project.yaml submission.test)")
     sub_p.add_argument("--dry-run", action="store_true", help="Print actions without connecting")
     sub_p.add_argument("--send-email", action="store_true", help="Email GenBank .sqn files")
 

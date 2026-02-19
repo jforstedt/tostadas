@@ -52,7 +52,13 @@ def send_sqn_email(sample_id, config_dict, mode, submission_dir, dry_run=True):
     part["Content-Disposition"] = f'attachment; filename="{sample_id}.sqn"'
     msg.attach(part)
 
-    s = smtplib.SMTP("localhost")
-    s.sendmail(from_email, to_email + cc_email, msg.as_string())
-    s.quit()
-    logging.info(f"Email sent for {sample_id} to {to_email}")
+    try:
+        s = smtplib.SMTP("localhost")
+        s.sendmail(from_email, to_email + cc_email, msg.as_string())
+        s.quit()
+        logging.info(f"Email sent for {sample_id} to {to_email}")
+    except Exception as e:
+        logging.error(
+            f"Failed to send email for {sample_id}: {e}\n"
+            f"  You can manually submit the .sqn file at: {attachment_path}"
+        )
