@@ -32,6 +32,7 @@ def cmd_submit(args):
     client = get_client(config_dict, mode=transfer_mode, dry_run=args.dry_run)
 
     submissions_dir = project.submissions_dir
+    filter_dbs = set(args.databases) if args.databases else None
 
     for dirpath, _, files in os.walk(submissions_dir):
         if dirpath == submissions_dir:
@@ -48,6 +49,9 @@ def cmd_submit(args):
             batch_id = parts[0]
             database = parts[1].lower()
             platform = parts[2] if len(parts) > 2 else None
+
+            if filter_dbs and database not in filter_dbs:
+                continue
 
             allowed_patterns = COMMON_ALLOWED + EXTRA_ALLOWED.get(database, [])
             files_to_upload = [
@@ -87,6 +91,8 @@ def cmd_submit(args):
             state_db.record_submission(database, batch_id, remote_dir)
 
         elif any(f.endswith(".sqn") for f in files):
+            if filter_dbs and "genbank" not in filter_dbs:
+                continue
             rel = os.path.relpath(dirpath, submissions_dir)
             parts = rel.split(os.sep)
             batch_id = parts[0] if parts else "unknown"
