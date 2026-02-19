@@ -63,15 +63,25 @@ def add_action_block(submission_root, top_metadata, biosample_metadata, config_d
     return biosample
 
 
+def _clean_date(value):
+    """Strip time portion from datetime values (e.g. '2025-03-05 00:00:00' -> '2025-03-05')."""
+    text = str(value).split(" ")[0]
+    return text
+
+
 def add_attributes_block(biosample_el, metadata, wastewater=False):
     """Add <Attributes> to a BioSample element.
     Port of BiosampleSubmission.add_attributes_block, lines 818-829.
     """
+    date_fields = {"collection_date", "collection_time"}
     attributes = ET.SubElement(biosample_el, "Attributes")
     for attr_name, attr_value in metadata.items():
         if attr_name not in IGNORED_FIELDS:
             attribute = ET.SubElement(attributes, "Attribute", {"attribute_name": attr_name})
-            attribute.text = safe_text(attr_value)
+            if attr_name in date_fields:
+                attribute.text = _clean_date(attr_value)
+            else:
+                attribute.text = safe_text(attr_value)
 
 
 def prepare_biosample_xml(samples, metadata_df, config_dict, outdir, wastewater=False,
