@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "tostadas-submit"
+version = "0.1.0"
+description = "Standalone NCBI submission CLI for TOSTADAS"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=1.4",
+    "pyyaml>=6.0",
+    "paramiko>=3.0",
+    "nameparser>=1.0",
+    "openpyxl>=3.0",
+    "lxml>=4.9",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+tostadas-submit = "tostadas_submit.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["tostadas_submit*"]

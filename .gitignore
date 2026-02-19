@@ -97,3 +97,11 @@ bin/.DS_Store
 /test_main_workflow
 /validation_outputs/
 /test_*
+
+# Python
+__pycache__/
+*.egg-info/
+dist/
+build/
+*.pyc
+.venv/
