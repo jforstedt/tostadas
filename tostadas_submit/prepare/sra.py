@@ -20,11 +20,17 @@ def get_compound_extension(filename):
 
 
 def symlink_or_copy(src, dst, copy=False):
+    # Remove broken symlinks left by crashed runs
+    if os.path.islink(dst) and not os.path.exists(dst):
+        os.remove(dst)
     if not os.path.exists(dst):
         if copy:
             shutil.copy(src, dst)
         else:
-            os.symlink(os.path.abspath(src), dst)
+            try:
+                os.symlink(os.path.abspath(src), dst)
+            except OSError:
+                shutil.copy(src, dst)
 
 
 def add_action_block(submission_root, sample):

@@ -41,6 +41,9 @@ PROJECT_YAML_TEMPLATE = {
         "biosample_package": "Pathogen.cl.1.0",
         "table2asn_email": "",
     },
+    "prepare": {
+        "pathogen": "",
+    },
 }
 
 

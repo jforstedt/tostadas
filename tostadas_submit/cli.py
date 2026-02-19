@@ -30,17 +30,20 @@ def build_parser():
     prep_p = subparsers.add_parser("prepare", help="Generate submission files from annotation output")
     prep_p.add_argument("--project-dir", default=".", help="Project directory")
     prep_p.add_argument("--metadata", required=True, help="Path to metadata file (TSV or Excel)")
+    prep_p.add_argument("--pathogen", default=None,
+                        help="Pathogen name (e.g. measles, rsv, bacteria). Reads species/mol_type/strip_pub_block from conf/<name>.config")
     prep_p.add_argument("--fasta-dir", default=None, help="Directory containing per-sample FASTA files")
     prep_p.add_argument("--gff-dir", default=None, help="Directory containing per-sample GFF/TBL files")
     prep_p.add_argument("--fastq-dir", default=None, help="Directory containing FASTQ files (for SRA)")
     prep_p.add_argument("--databases", nargs="+", required=True,
                         choices=["biosample", "sra", "genbank"],
                         help="Databases to prepare submissions for")
-    prep_p.add_argument("--species", required=True,
+    prep_p.add_argument("--species", default=None,
                         choices=["sars", "flu", "bacteria", "eukaryote", "virus", "rsv", "mpxv", "mev"],
-                        help="Organism type")
-    prep_p.add_argument("--mol-type", default="genomic", help="Molecule type for table2asn")
-    prep_p.add_argument("--strip-pub-block", action="store_true", help="Remove pub citation block from .sqn")
+                        help="Override species from pathogen config")
+    prep_p.add_argument("--mol-type", default=None, help="Override mol_type from pathogen config")
+    prep_p.add_argument("--strip-pub-block", action="store_true", default=None,
+                        help="Override strip_pub_block from pathogen config")
     prep_p.add_argument("--wastewater", action="store_true", help="Use wastewater metadata columns")
     prep_p.add_argument("--batch-size", type=int, default=50, help="Samples per batch")
 

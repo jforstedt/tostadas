@@ -2,11 +2,26 @@ import os
 import logging
 import math
 
+from tostadas_submit import CONF_DIR
 from tostadas_submit.project import load_project
+from tostadas_submit.config import parse_pathogen_config, resolve_species
 from tostadas_submit.metadata import load_metadata, build_sample_records
 from tostadas_submit.prepare.biosample import prepare_biosample_xml
 from tostadas_submit.prepare.sra import prepare_sra_xml
 from tostadas_submit.prepare.genbank import prepare_genbank_submission
+
+
+def _load_pathogen_params(args, prep_config):
+    """Resolve pathogen name to config file and parse it."""
+    pathogen = args.pathogen or prep_config.get("pathogen", "")
+    if not pathogen:
+        return {}
+    config_path = os.path.join(CONF_DIR, f"{pathogen}.config")
+    if not os.path.isfile(config_path):
+        logging.error(f"Pathogen config not found: {config_path}")
+        raise SystemExit(1)
+    logging.info(f"Loaded pathogen config: {config_path}")
+    return parse_pathogen_config(config_path)
 
 
 def cmd_prepare(args):
@@ -14,14 +29,30 @@ def cmd_prepare(args):
     config_dict = project.config_dict_legacy()
     state_db = project.state_db
 
+    prep_config = project.config.get("prepare", {})
+    pathogen_params = _load_pathogen_params(args, prep_config)
+
+    # Species: CLI flag > pathogen config > error
+    species = args.species
+    if species is None and pathogen_params:
+        species = resolve_species(pathogen_params)
+    if not species:
+        logging.error("No pathogen specified. Pass --pathogen <name> or set prepare.pathogen in project.yaml.")
+        raise SystemExit(1)
+
+    # mol_type: CLI flag > pathogen config > default "genomic"
+    mol_type = args.mol_type if args.mol_type is not None else pathogen_params.get("mol_type", "genomic")
+
+    # strip_pub_block: CLI flag > pathogen config > default False
+    strip_pub = args.strip_pub_block if args.strip_pub_block is not None else pathogen_params.get("strip_pub_block", False)
+
     metadata_df = load_metadata(args.metadata)
     databases = args.databases
-    species = args.species
     batch_size = args.batch_size
 
     parameters = {
-        "mol_type": args.mol_type,
-        "strip_pub_block": args.strip_pub_block,
+        "mol_type": mol_type,
+        "strip_pub_block": strip_pub,
     }
 
     all_sample_names = metadata_df["sample_name"].astype(str).tolist()

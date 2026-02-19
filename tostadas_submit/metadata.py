@@ -72,8 +72,11 @@ def build_sample_records(metadata_df, batch_id, species, databases,
         fasta_path = None
         if "fasta_path" in row and pd.notna(row["fasta_path"]) and str(row["fasta_path"]).strip():
             fasta_path = str(row["fasta_path"])
-            if not os.path.isabs(fasta_path) and fasta_dir:
-                fasta_path = os.path.join(fasta_dir, fasta_path)
+            if not os.path.isabs(fasta_path) and not os.path.exists(fasta_path) and fasta_dir:
+                # Only join with fasta_dir if the path doesn't exist as-is
+                joined = os.path.join(fasta_dir, os.path.basename(fasta_path))
+                if os.path.exists(joined):
+                    fasta_path = joined
         elif fasta_dir:
             fasta_path = find_file_for_sample(sample_name, fasta_dir, fasta_exts)
 

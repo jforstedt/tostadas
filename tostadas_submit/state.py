@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 VALID_DATABASES = ("biosample", "sra", "genbank")
@@ -40,7 +40,7 @@ class StateDB:
         self.conn.commit()
 
     def register_samples(self, sample_names, batch_id):
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         for name in sample_names:
             self.conn.execute(
                 "INSERT OR IGNORE INTO samples (sample_name, batch_id, last_updated) VALUES (?, ?, ?)",
@@ -75,7 +75,7 @@ class StateDB:
             raise ValueError(f"Invalid database: {database}")
         if status not in VALID_STATUSES:
             raise ValueError(f"Invalid status: {status}")
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         status_col = f"{database}_status"
         acc_col = f"{database}_acc"
         self.conn.execute(
@@ -87,7 +87,7 @@ class StateDB:
         self.conn.commit()
 
     def record_submission(self, database, batch_id, remote_dir=None):
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         cursor = self.conn.execute(
             "INSERT INTO submissions (database, batch_id, submitted_at, status, remote_dir) "
             "VALUES (?, ?, ?, 'submitted', ?)",

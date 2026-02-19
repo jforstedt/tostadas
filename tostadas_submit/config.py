@@ -102,3 +102,47 @@ def load_and_normalize(path):
     if fmt == "legacy":
         return legacy_to_new(raw)
     return raw
+
+
+def parse_pathogen_config(path):
+    """Parse a Nextflow pathogen config file (conf/measles.config, etc.)
+    and return a dict of the params block values.
+    """
+    params = {}
+    in_params = False
+    with open(path, "r") as f:
+        for line in f:
+            stripped = line.strip()
+            if stripped.startswith("params {") or stripped == "params {":
+                in_params = True
+                continue
+            if in_params and stripped == "}":
+                break
+            if in_params and "=" in stripped:
+                key, _, value = stripped.partition("=")
+                key = key.strip()
+                value = value.strip().rstrip(",")
+                # Unquote strings
+                if (value.startswith("'") and value.endswith("'")) or \
+                   (value.startswith('"') and value.endswith('"')):
+                    value = value[1:-1]
+                elif value == "true":
+                    value = True
+                elif value == "false":
+                    value = False
+                elif value == "null":
+                    value = None
+                params[key] = value
+    return params
+
+
+def resolve_species(pathogen_params):
+    """Map organism_type + virus_subtype from a pathogen config to
+    the species string used by the CLI."""
+    org_type = pathogen_params.get("organism_type", "")
+    subtype = pathogen_params.get("virus_subtype")
+    if org_type == "bacteria":
+        return "bacteria"
+    if subtype and subtype != "null":
+        return subtype
+    return org_type or "virus"

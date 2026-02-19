@@ -14,11 +14,17 @@ from tostadas_submit.prepare.xml_base import safe_text, init_xml_root, finalize_
 
 
 def symlink_or_copy(src, dst, copy=False):
+    # Remove broken symlinks left by crashed runs
+    if os.path.islink(dst) and not os.path.exists(dst):
+        os.remove(dst)
     if not os.path.exists(dst):
         if copy:
             shutil.copy(src, dst)
         else:
-            os.symlink(os.path.abspath(src), dst)
+            try:
+                os.symlink(os.path.abspath(src), dst)
+            except OSError:
+                shutil.copy(src, dst)
 
 
 # --- Source, Comment, Authorset file generation ---
