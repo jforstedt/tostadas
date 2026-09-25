@@ -911,11 +911,6 @@ class XMLSubmission(ABC):
 		if submission_title:
 			title = ET.SubElement(description, 'Title')
 			title.text = submission_title
-		if "Specified_Release_Date" in self.submission_config:
-			release_date_value = self.submission_config["Specified_Release_Date"]
-			if release_date_value and release_date_value != "Not Provided":
-				release_date = ET.SubElement(description, "Hold")
-				release_date.set("release_date", release_date_value)
 		comment = ET.SubElement(description, 'Comment')
 		comment.text = submission_comment or submission_title or "Batch submission"
 		# Organization
@@ -933,6 +928,12 @@ class XMLSubmission(ABC):
 		contact_name = ET.SubElement(contact_el, 'Name')
 		ET.SubElement(contact_name, 'First').text = self.safe_text(self.submission_config['Submitter']['Name']['First'])
 		ET.SubElement(contact_name, 'Last').text = self.safe_text(self.submission_config['Submitter']['Name']['Last'])
+		# Hold must come after Organization per NCBI's submission schema
+		if "Specified_Release_Date" in self.submission_config:
+			release_date_value = self.submission_config["Specified_Release_Date"]
+			if release_date_value and release_date_value != "Not Provided":
+				release_date = ET.SubElement(description, "Hold")
+				release_date.set("release_date", release_date_value)
 	def finalize_xml(self):
 		xml_output_path = os.path.join(self.outdir, "submission.xml")
 		rough_string = ET.tostring(self.submission_root, encoding='utf-8')
