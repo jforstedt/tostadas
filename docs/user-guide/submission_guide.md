@@ -234,7 +234,7 @@ These times are approximate and depend on NCBI queue depth. Production submissio
 
 ## Submission config fields
 
-The fields and corresponding example values can be found here: [Submission Config](https://github.com/CDCgov/tostadas/raw/main/conf/submission_config.yaml).
+The fields and corresponding example values can be found here: [Submission Config](https://github.com/CDCgov/tostadas/blob/master/conf/submission_config.yaml).
 
 | Field Name             | Description                                                                      | Input Required |
 |------------------------|----------------------------------------------------------------------------------|----------------|
@@ -248,7 +248,7 @@ The fields and corresponding example values can be found here: [Submission Confi
 | Role                   | Role of person submitting (should be "owner")                                    | Yes (string)   |
 | Type                   | Type of submission (should usually be "institute")                               | Yes (string)   |
 | NCBI_Namespace         | An SPUID attribute that is unique for each submitter, coordinate this with NCBI  | Yes (string)   |
-| Org_ID                 | Organization ID for NCBI                                                         | Yes (string)   |
+| Org_ID                 | NCBI-assigned numeric organization/center ID (positive integer). Leave blank unless NCBI assigned your group one. | No (integer)   |
 | Submitting_Org         | Name of the organization or company you are affiliated with                      | Yes (string)   |
 | Submitting_Org_Dept    | Name of the department with organization or company                              | No (string)    |
 | Street                 | Street address of the organization or company                                    | Yes (string)   |
@@ -259,7 +259,7 @@ The fields and corresponding example values can be found here: [Submission Confi
 | Email                  | Submitter's email address                                                        | Yes (string)   |
 | Phone                  | Submitter's phone number                                                         | No (string)    |
 | Submission_Title       | Title for the NCBI submission (e.g., MeV_YYYYMMDD_consensus)                     | No (string)    |
-| Specified_Release_Date | Specify a date to release the samples to the public repository                   | No (string)    |
+| Specified_Release_Date | Date to release the sequences to the public repository. Leave blank for immediate release.        | No (YYYY-MM-DD) |
 | Submitter              | Leave blank                                                                      | Yes (blank)    |
 | '@email'               | Submitter's email address                                                        | Yes (string)   |
 | '@alt_email'           | An alternate email address to also receive NCBI submission notification emails    | Yes (string)   |
